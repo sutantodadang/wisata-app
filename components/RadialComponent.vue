@@ -1,5 +1,6 @@
 <template>
-    <div class="relative" :class="`w-${width} h-${height}`">
+    <div class="relative"
+        :class="`w-${width} h-${height} sm:w-${smWidth} sm:h-${smHeight} md:w-${mdWidth} md:h-${mdHeight}`">
         <svg class="w-full h-full" viewBox="0 0 100 100">
             <!-- Background circle -->
             <circle class="text-gray-200 stroke-current" :stroke-width="strokeWidth" cx="50" cy="50" r="25"
@@ -21,8 +22,6 @@
 </template>
 
 <script setup lang="ts">
-
-
 defineProps({
     progress: {
         type: Number,
@@ -59,9 +58,24 @@ defineProps({
     fontColor: {
         type: String,
         default: "#9701A5"
+    },
+    smWidth: {
+        type: Number,
+        default: 30
+    },
+    smHeight: {
+        type: Number,
+        default: 30
+    },
+    mdWidth: {
+        type: Number,
+        default: 50
+    },
+    mdHeight: {
+        type: Number,
+        default: 50
     }
 })
-
 </script>
 
 <style>

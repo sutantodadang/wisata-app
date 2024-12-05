@@ -151,12 +151,13 @@ const dropdownItems = computed(() => {
 
 <template>
 
-    <div class="bg-white rounded-b-xl shadow-lg w-2/5 h-28 flex px-10 py-10 gap-2 items-center justify-between">
+    <div
+        class="bg-white rounded-b-xl shadow-lg w-full md:w-2/5 h-[50%] md:h-28 flex flex-col md:flex-row px-4 md:px-10 py-4 md:py-10 gap-2 items-center md:justify-around">
 
-        <UDropdown :items="dropdownItems" :popper="{ placement: 'bottom-start' }" class="w-[150%]"
+        <UDropdown :items="dropdownItems" :popper="{ placement: 'bottom-start' }" class="w-full md:w-[150%]"
             :ui="{ width: 'w-80', height: 'h-96' }">
             <InputComponent v-model:value="location" placeholder="Where are you going?" icon="i-mdi:map-marker-outline"
-                type="text" class="w-[150%]" use-clear @focus="fetchLocationData" />
+                type="text" class="w-full md:w-[150%]" use-clear @focus="fetchLocationData" />
             <template #item="{ item }">
                 <div v-if="isLoading" class="flex items-center justify-center py-2">
                     <UIcon name="i-mdi:loading" class="animate-spin h-5 w-5 text-gray-500" />
@@ -222,7 +223,7 @@ const dropdownItems = computed(() => {
 
 
         <UButton @click="onClose" label="Search" icon="i-mdi:magnify" :trailing="false" color="blue"
-            class="w-[12%] h-12" />
+            class="w-full md:w-[12%] h-12" />
     </div>
 
 </template>

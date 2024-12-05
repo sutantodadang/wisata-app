@@ -8,7 +8,8 @@
                     activeTab === index
                         ? 'border-blue-500 text-blue-500'
                         : 'border-transparent hover:border-gray-300',
-                    isTop ? 'border-t-2' : 'border-b-2'
+                    isTop ? 'border-t-2' : 'border-b-2',
+                    'sm:px-2 sm:py-1 md:px-3 md:py-1.5' // Responsive classes
                 ]">
                 <div class="flex items-center te">
                     <UIcon :name="item.icon" />

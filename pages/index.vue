@@ -110,14 +110,14 @@ const selectedRoom = computed(() => {
 </script>
 
 <template>
-
-    <main class="container mx-auto">
-        <section class="flex pt-32 pb-20 items-center px-80">
-
+    <main class="container mx-auto pt-4 px-4 md:px-6 lg:px-8">
+        <!-- Hero section -->
+        <section
+            class="flex flex-col md:flex-row pt-20 md:pt-32 pb-10 md:pb-20 items-center md:px-8 lg:px-80 gap-8 md:gap-12 lg:gap-32">
             <img :src="store.content?.catalog.hero_image_url.ori" alt="Fairmont Jakarta"
-                class="rounded-full object-cover w-44 h-44" />
+                class="rounded-full object-cover w-32 h-32 md:w-44 md:h-44" />
 
-            <div class="text-black items-start justify-start flex flex-col pl-32">
+            <div class="text-black items-center md:items-start flex flex-col text-center md:text-left">
                 <div class="flex items-center text-center justify-center">
                     <h1 class="text-xl font-bold">{{ store.content?.name }}</h1>
                     <div class="text-yellow-500 flex ">
@@ -149,8 +149,6 @@ const selectedRoom = computed(() => {
                 </div>
             </div>
         </section>
-
-
 
         <section>
             <TabsComponent :items="items" @tabChange="handleTabChange" isTop />
@@ -193,14 +191,13 @@ const selectedRoom = computed(() => {
 
                                 {{ console.log(offers) }}
 
-                                <div class="flex justify-center gap-6 w-full">
+                                <div class="flex flex-col lg:flex-row justify-center gap-6 w-full">
 
-                                    <div class="flex flex-col items-center">
+                                    <div class="flex flex-col items-center w-full lg:w-auto">
 
                                         <NuxtImg :src="store.groupedImagesByRoomName[bedGroup][0]"
-                                            :alt="store.groupedImagesByRoomName[bedGroup][0]" loading="lazy" width="300"
-                                            height="100" densities="x1 x2" quality="100"
-                                            class="max-w-full h-auto rounded-lg" />
+                                            :alt="store.groupedImagesByRoomName[bedGroup][0]" loading="lazy"
+                                            class="w-full lg:w-[300px] h-auto rounded-lg" />
 
                                         <div class="grid grid-cols-3 gap-1 justify-center pt-1 items-center">
                                             <div v-for="(image, index) in store.groupedImagesByRoomName[bedGroup]"
@@ -219,7 +216,7 @@ const selectedRoom = computed(() => {
 
 
                                     <div
-                                        class="shadow-xl rounded-lg bg-white border-t border-r border-l border-gray-200 mb-8 w-2/4">
+                                        class="shadow-xl rounded-lg bg-white border border-gray-200 mb-8 w-full lg:w-2/4">
 
                                         <div class="border-b border-gray-200 p-7">
 
@@ -368,7 +365,7 @@ const selectedRoom = computed(() => {
             </div>
 
             <div v-if="activeTab == 1">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 py-10">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 py-10">
                     <div v-for="(image, index) in store.content?.image" :key="index" class="relative">
                         <img :src="image.url.ori" :alt="image.caption"
                             class="w-full h-48 object-cover rounded-lg shadow-md" />
@@ -427,8 +424,8 @@ const selectedRoom = computed(() => {
 
 
         <UModal v-model="isOpen" :ui="{
-            width: 'w-[50vh]',
-            height: 'h-[40vh]',
+            width: 'w-[90vw] md:w-[50vh]',
+            height: 'h-[80vh] md:h-[40vh]',
             overflow: 'overflow-y-auto',
             strategy: 'override'
         }">
@@ -436,7 +433,7 @@ const selectedRoom = computed(() => {
             <div class="w-full h-full overflow-auto">
 
                 <div class="flex items-center justify-between border-b h-12">
-                    <div class="flex items-center justify-center pl-40 gap-2">
+                    <div class="flex items-center justify-center pl-4 md:pl-40 gap-2">
                         <UIcon name="i-mdi:share-variant-outline" class="text-blue-500" />
                         <h2>Share This Offer</h2>
                     </div>
@@ -445,8 +442,8 @@ const selectedRoom = computed(() => {
                 </div>
 
 
-                <div class="flex justify-center">
-                    <section class="w-96 h-full">
+                <div class="flex flex-col md:flex-row justify-center">
+                    <section class="w-full md:w-96 h-full">
                         <TabsComponent :items="itemsButton" @tabChange="handleTabButtonChange" :isTop=false />
                         <div v-if="activeTabButton == 0">
                             <div class="flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
@@ -583,7 +580,7 @@ const selectedRoom = computed(() => {
 
                     </section>
 
-                    <section class="flex flex-col justify-between">
+                    <section class="flex flex-col justify-between mt-4 md:mt-0">
                         <div>
                             <div class="flex items-center justify-between h-11 border-b p-3 text-sm">
                                 <p>Address</p>
@@ -617,6 +614,13 @@ const selectedRoom = computed(() => {
 
         </UModal>
     </main>
-
-
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+</style>
