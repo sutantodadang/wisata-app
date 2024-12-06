@@ -57,6 +57,10 @@ const itemsButton = [{
 const activeTab = ref(0)
 const activeTabButton = ref(0)
 const activeRoom = ref<Offer>()
+const isAddressVisible = ref(true)
+const isReviewsVisible = ref(true)
+const isRoomInfoVisible = ref(true)
+const isTotalPriceVisible = ref(true)
 
 
 const handleModalButton = (selectOffer: Offer) => {
@@ -130,7 +134,33 @@ const selectedRoomData = computed(() => {
 const isLoading = computed(() => store.isLoading);
 
 const transitionName = ref('fade');
+const zoomed = ref(false);
+const dragging = ref(false);
+const position = ref({ x: 0, y: 0 });
+const startX = ref(0);
+const startY = ref(0);
 
+const toggleZoom = () => {
+    zoomed.value = !zoomed.value;
+};
+
+
+const startDragging = (event: any) => {
+    dragging.value = true;
+    startX.value = event.clientX - position.value.x;
+    startY.value = event.clientY - position.value.y;
+};
+
+const stopDragging = () => {
+    dragging.value = false;
+};
+
+const drag = (event: any) => {
+    if (dragging.value) {
+        position.value.x = event.clientX - startX.value;
+        position.value.y = event.clientY - startY.value;
+    }
+};
 </script>
 
 <template>
@@ -154,7 +184,8 @@ const transitionName = ref('fade');
                 <div class="mt-2 h-4 bg-gray-300 w-24"></div>
                 <div class="mt-2 h-4 bg-gray-300 w-16"></div>
             </div>
-            <div v-else class="text-black items-center md:items-start flex flex-col text-center md:text-left">
+            <div v-else
+                class="text-black dark:text-white items-center md:items-start flex flex-col text-center md:text-left">
                 <div class="flex items-center text-center justify-center">
                     <h1 class="text-xl font-bold">{{ store.content?.name }}</h1>
                     <div class="text-yellow-500 flex ">
@@ -238,10 +269,9 @@ const transitionName = ref('fade');
 
                                 <div v-for="(offers, bedGroup) in filteredOffers" :key="bedGroup">
 
-
                                     <div class="flex flex-col lg:flex-row justify-center gap-6 w-full">
                                         <div class="flex flex-col items-center w-full lg:w-auto">
-                                            <div class="relative">
+                                            <div class="relative w-full">
                                                 <NuxtImg :src="store.groupedImagesByRoomName[bedGroup][0]"
                                                     :alt="store.groupedImagesByRoomName[bedGroup][0]" loading="lazy"
                                                     class="w-full lg:w-[300px] h-auto rounded-lg" />
@@ -268,18 +298,14 @@ const transitionName = ref('fade');
                                             </div>
                                         </div>
 
-
                                         <div
                                             class="shadow-xl rounded-lg bg-white border border-gray-200 mb-8 w-full lg:w-2/4">
-
-                                            <div class="border-b border-gray-200 p-7">
-
+                                            <div class="border-b border-gray-200 p-4 lg:p-7">
                                                 <div class="flex items-center justify-between">
                                                     <h3 class="text-xl font-bold mb-4">{{ bedGroup }}</h3>
                                                     <UButton label="See details" variant="ghost" color="blue"
                                                         @click="handleModalAmenitiesButton(offers[0])" />
                                                 </div>
-
 
                                                 <div class="flex items-center justify-start gap-2 text-gray-500">
                                                     <UIcon name="i-mdi:bed-king-outline" />
@@ -293,13 +319,10 @@ const transitionName = ref('fade');
                                                     </svg>
                                                     <p>{{ offers[0].room_size_sqm }} m2</p>
                                                 </div>
-
                                             </div>
 
-
-                                            <div v-for="offer in offers" :key="offer.offer_id" class="overflow-hidden ">
-
-                                                <div class="p-7 border-b border-gray-200">
+                                            <div v-for="offer in offers" :key="offer.offer_id" class="overflow-hidden">
+                                                <div class="p-4 lg:p-7 border-b border-gray-200">
                                                     <div class="flex flex-row items-center justify-between">
                                                         <div v-if="offer.meal_plan_code !== 'RO'"
                                                             class="flex items-center gap-2 text-green-600">
@@ -311,7 +334,6 @@ const transitionName = ref('fade');
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                                 role="img" aria-hidden="true" class="text-gray-800"
                                                                 style="font-size: 16px; height: 16px; width: 16px;">
-                                                                <!-- <line x1="4" y1="4" x2="20" y2="20"></line> -->
                                                                 <path
                                                                     d="M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z">
                                                                 </path>
@@ -329,7 +351,6 @@ const transitionName = ref('fade');
                                                             </UTooltip>
                                                             <UTooltip text="Screenshot offer"
                                                                 :popper="{ placement: 'top' }">
-
                                                                 <UButton icon="i-mdi:line-scan" variant="ghost"
                                                                     color="gray" @click="handleModalButton(offer)" />
                                                             </UTooltip>
@@ -340,17 +361,13 @@ const transitionName = ref('fade');
                                                                         class="text-gray-800" />
                                                                     <template #header="{ item }">
                                                                         <p>{{ item.label }}</p>
-
-
                                                                     </template>
                                                                     <template #item="{ item }">
-
                                                                         <UButton :icon="item.icon" :label="item.label"
                                                                             variant="ghost" color="gray"
                                                                             @click="handleModalButton(offer)" />
                                                                     </template>
                                                                 </UDropdown>
-
                                                             </UTooltip>
                                                         </div>
                                                     </div>
@@ -366,7 +383,6 @@ const transitionName = ref('fade');
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                                 role="img" aria-hidden="true" class="text-gray-800"
                                                                 style="font-size: 16px; height: 16px; width: 16px;">
-                                                                <!-- <line x1="4" y1="4" x2="20" y2="20"></line> -->
                                                                 <path
                                                                     d="M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z">
                                                                 </path>
@@ -375,34 +391,26 @@ const transitionName = ref('fade');
                                                             </svg>
                                                             <p class=" text-gray-800">No Cancellation</p>
                                                         </div>
-
-
                                                     </div>
-
 
                                                     <div class="flex items-center justify-between">
                                                         <div>
                                                             <h4>Rp {{
                                                                 formatRate(offer.pricing_data.rate_nightly.toString())
-                                                                }}
-                                                                /
+                                                            }} /
                                                                 night <span class="text-gray-500">*</span>
                                                             </h4>
-
                                                             <p class="text-gray-500">Total · Rp {{
                                                                 formatRate(offer.pricing_data.price_total.toString()) }}
                                                             </p>
-
                                                             <p class="text-gray-500">after tax & fees</p>
                                                         </div>
 
                                                         <div class="flex justify-between items-center">
-
                                                             <button
                                                                 class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">Book
                                                                 Now</button>
                                                         </div>
-
                                                     </div>
 
                                                     <div class="flex items-center justify-between">
@@ -419,13 +427,8 @@ const transitionName = ref('fade');
                                                         </p>
                                                     </div>
                                                 </div>
-
-
                                             </div>
-
                                         </div>
-
-
                                     </div>
 
 
@@ -511,212 +514,218 @@ const transitionName = ref('fade');
 
         <transition :name="transitionName">
             <UModal v-model="isOpen" :ui="{
-                width: 'w-[90vw] md:w-[50vh]',
-                height: 'h-[80vh] md:h-[40vh]',
+                width: 'w-[90vw] md:w-[30vw]',
+                height: 'h-[80vh] md:h-[50vh]',
                 overflow: 'overflow-y-auto',
                 strategy: 'override'
             }">
 
-                <div class="w-full h-full overflow-auto">
 
-                    <div class="flex items-center justify-between border-b h-12">
-                        <div class="flex items-center justify-center pl-4 md:pl-40 gap-2">
-                            <UIcon name="i-mdi:share-variant-outline" class="text-blue-500" />
-                            <h2>Share This Offer</h2>
-                        </div>
-                        <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1"
-                            @click="isOpen = false" />
+                <div class="flex items-center justify-between border-b h-12">
+                    <div class="flex items-center justify-center pl-4 md:pl-40 gap-2">
+                        <UIcon name="i-mdi:share-variant-outline" class="text-blue-500" />
+                        <h2>Share This Offer</h2>
                     </div>
+                    <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1"
+                        @click="isOpen = false" />
+                </div>
 
 
-                    <div class="flex flex-col md:flex-row justify-center">
-                        <section class="w-full md:w-96 h-full">
-                            <TabsComponent :items="itemsButton" @tabChange="handleTabButtonChange" :isTop=false />
-                            <div v-if="activeTabButton == 0">
-                                <div v-if="isLoading"
-                                    class="animate-pulse flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
-                                    <div class="h-6 bg-gray-300 w-48"></div>
-                                    <div class="mt-2 h-4 bg-gray-300 w-32"></div>
-                                    <div class="mt-2 h-4 bg-gray-300 w-24"></div>
-                                    <div class="mt-2 h-4 bg-gray-300 w-16"></div>
-                                </div>
-                                <div v-else class="flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
-                                    <div>
-                                        <p>{{ store.content?.name }}</p>
-                                        <p v-if="(store.content?.catalog.review_rating ?? 0) > 90">Excellent ({{
+                <div class="flex flex-col md:flex-row justify-center h-full z-20">
+                    <section class="w-full md:w-[60%] h-full bg-gray-100">
+                        <TabsComponent :items="itemsButton" @tabChange="handleTabButtonChange" :isTop=false
+                            class="bg-white" />
+                        <div v-if="activeTabButton == 0">
+                            <div v-if="isLoading"
+                                class="animate-pulse flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
+                                <div class="h-6 bg-gray-300 w-48"></div>
+                                <div class="mt-2 h-4 bg-gray-300 w-32"></div>
+                                <div class="mt-2 h-4 bg-gray-300 w-24"></div>
+                                <div class="mt-2 h-4 bg-gray-300 w-16"></div>
+                            </div>
+                            <div v-else class="flex items-start flex-col text-sm gap-y-5 p-5 h-full ">
+                                <div>
+                                    <p>{{ store.content?.name }}</p>
+                                    <p v-if="(store.content?.catalog.review_rating ?? 0) > 90 && isReviewsVisible">
+                                        Excellent ({{
                                             store.content?.catalog.review_rating }} of 100) · {{
-                                                store.content?.catalog.review_count }} reviews</p>
-                                        <p>{{ store.dateFormatted }} · {{
-                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
+                                            store.content?.catalog.review_count }} reviews</p>
+                                    <p>{{ store.dateFormatted }} · {{
+                                        moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
                                         }}
-                                            nights</p>
-                                    </div>
+                                        nights</p>
+                                </div>
 
-                                    <div>
-                                        <p>{{ selectedRoom?.room_name }}</p>
-                                        <p>{{ selectedRoom?.room_bed_groups }}</p>
-                                        <p>{{ selectedRoom?.meal_plan_description }} · {{
-                                            selectedRoom?.cancel_policy_description }}</p>
-                                        <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night</p>
-                                        <p>Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }} ({{
+                                <div>
+                                    <p>{{ selectedRoom?.room_name }}</p>
+                                    <p v-if="isRoomInfoVisible">{{ selectedRoom?.room_bed_groups }}, <span>{{
+                                        selectedRoom?.room_size_sqm }}m²</span></p>
+                                    <p>{{ selectedRoom?.meal_plan_description }} · {{
+                                        selectedRoom?.cancel_policy_description }}</p>
+                                    <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night</p>
+                                    <p v-if="isTotalPriceVisible">Total · Rp {{
+                                        formatRate(String(selectedRoom?.price_total)) }}
+                                        ({{
                                             store.rooms }}
-                                            room, {{
-                                                moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
-                                            }}
-                                            nights)</p>
-                                    </div>
-
-                                    <p>*Price is subject to change without prior notice</p>
-
-                                </div>
-                            </div>
-
-                            <div v-if="activeTabButton == 1">
-
-                                <div v-if="isLoading"
-                                    class="animate-pulse flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
-                                    <div class="h-6 bg-gray-300 w-48"></div>
-                                    <div class="mt-2 h-4 bg-gray-300 w-32"></div>
-                                    <div class="mt-2 h-4 bg-gray-300 w-24"></div>
-                                    <div class="mt-2 h-4 bg-gray-300 w-16"></div>
-                                </div>
-                                <div v-else class="flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
-                                    <UCard :ui="{ strategy: 'override', base: 'w-80 h-96' }">
-                                        <div class="flex items-center text-center justify-start">
-                                            <h1 class="text-sm font-bold">{{ store.content?.name }}</h1>
-                                            <div class="text-yellow-500 flex ">
-                                                <div v-for=" (star) in store.content?.catalog.star_rating">
-                                                    <UIcon name="i-fontisto:star" class="w-2" />
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-                                        <div class="flex items-center justify-start gap-1">
-
-
-                                            <RadialComponent :text="String(store.content?.catalog.review_rating)"
-                                                :progress="store.content?.catalog.review_rating" :strokeWidth="5"
-                                                :width="12" :height="12" strokeColor="text-fuchsia-700" :max="100"
-                                                :font-size="18" font-color="#a21caf" />
-
-
-
-                                            <div v-if="Number(store.content?.catalog.review_rating) > 90"
-                                                class="text-sm">
-                                                <p>Excellent</p>
-                                            </div>
-                                            <div v-else class="text-sm">
-                                                <p class="text-red-500">No Rating</p>
-                                            </div>
-                                            ·
-                                            <div class="text-sm">{{ store.content?.catalog.review_count }} reviews</div>
-                                        </div>
-
-                                        <p class="text-xs">{{ store.dateFormatted }} · {{
+                                        room, {{
                                             moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
                                         }}
-                                            nights</p>
+                                        nights)</p>
+                                </div>
 
+                                <p>*Price is subject to change without prior notice</p>
 
-                                        <img :src="selectedRoom?.room_images[0].size_sm" :alt="selectedRoom?.room_name"
-                                            class="w-64 h-28 object-cover rounded-lg shadow-md my-2" />
-                                        <div>
-                                            <h3 class="text-sm font-bold">{{ selectedRoom?.room_name }}</h3>
-                                            <div class="flex items-center justify-start text-sm gap-2">
-                                                <p>{{ selectedRoom?.room_bed_groups }}</p>
-                                                <p>{{ selectedRoom?.room_size_sqm }} m2</p>
-                                            </div>
+                            </div>
+                        </div>
+
+                        <div v-if="activeTabButton == 1"
+                            class="flex flex-col justify-center items-center bg-gray-100 p-5">
+                            <div v-if="isLoading"
+                                class="animate-pulse flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
+                                <div class="h-6 bg-gray-300 w-48"></div>
+                                <div class="mt-2 h-4 bg-gray-300 w-32"></div>
+                                <div class="mt-2 h-4 bg-gray-300 w-24"></div>
+                                <div class="mt-2 h-4 bg-gray-300 w-16"></div>
+                            </div>
+                            <div class="bg-white shadow-lg rounded-lg p-4 w-full max-w-md" :class="[
+                                dragging ? 'z-0' : 'z-10',
+                                zoomed ? 'scale-125' : 'scale-100',
+                                !dragging ? 'transition-transform duration-300 ease-in-out' : '',
+                                dragging ? 'cursor-grabbing' : 'cursor-grab'
+                            ]" :style="{ transform: `translate(${position.x}px, ${position.y}px)` }"
+                                @mousedown="startDragging" @mouseup="stopDragging" @mousemove="drag">
+                                <!-- Header -->
+                                <div class="flex justify-between items-center">
+                                    <h1 class="text-lg font-bold">{{ store.content?.name }}</h1>
+                                    <div class="text-yellow-500 flex space-x-1">
+                                        <div v-for="star in store.content?.catalog.star_rating" :key="star">
+                                            <UIcon name="i-fontisto:star" class="w-4 h-4" />
                                         </div>
-
-                                        <div>
-
-
-                                            <div class="flex flex-row items-center text-sm gap-y-2">
-                                                <div v-if="selectedRoom?.cancel_policy_code !== 'RO'"
-                                                    class="flex items-center gap-2 text-green-600">
-                                                    <UIcon name="i-material-symbols:credit-score-outline" />
-                                                    <p>{{ selectedRoom?.cancel_policy_description }}</p>
-                                                </div>
-
-                                                <div v-else class="flex items-center gap-2 text-sm">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                        role="img" aria-hidden="true" class="text-gray-800"
-                                                        style="font-size: 16px; height: 16px; width: 16px;">
-
-                                                        <path
-                                                            d="M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z">
-                                                        </path>
-                                                        <line x1="26" y1="26" x2="6" y2="6" stroke="gray"
-                                                            stroke-width="2" />
-                                                    </svg>
-                                                    <p class=" text-gray-800">No Cancellation</p>
-                                                </div>
-
-
-                                            </div>
-
-
-                                            <div class="flex items-center justify-between text-xs">
-                                                <div>
-                                                    <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night
-                                                    </p>
-                                                    <p>Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }}
-                                                        ({{
-                                                            store.rooms }}
-                                                        room, {{
-                                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
-                                                        }}
-                                                        nights)</p>
-
-                                                    <p>*Price is subject to change without prior notice</p>
-                                                </div>
-
-
-                                            </div>
-                                        </div>
-                                    </UCard>
-
+                                    </div>
                                 </div>
 
+                                <!-- Rating and Reviews -->
+                                <div v-if="isReviewsVisible" class="flex items-center mt-2 text-gray-600">
+                                    <RadialComponent :text="String(store.content?.catalog.review_rating)"
+                                        :progress="store.content?.catalog.review_rating" :strokeWidth="5" :width="12"
+                                        :height="12" strokeColor="text-fuchsia-700" :max="100" :font-size="18"
+                                        font-color="#a21caf" />
+                                    <div v-if="Number(store.content?.catalog.review_rating) > 90" class="ml-2 text-sm">
+                                        <p>Excellent</p>
+                                    </div>
+                                    <div v-else class="ml-2 text-sm">
+                                        <p class="text-red-500">No Rating</p>
+                                    </div>
+                                    <p class="ml-2 text-sm">· {{ store.content?.catalog.review_count }} reviews</p>
+                                </div>
 
+                                <!-- Dates and Nights -->
+                                <p class="mt-2 text-sm text-gray-500">
+                                    {{ store.dateFormatted }} · {{
+                                        moment.duration(moment(store.checkout).diff(moment(store.checkin))).days() }}
+                                    nights
+                                </p>
 
+                                <!-- Room Image -->
+                                <img :src="selectedRoom?.room_images[0].size_sm" :alt="selectedRoom?.room_name"
+                                    class="w-full h-32 object-cover rounded-lg shadow-md my-4" />
 
+                                <!-- Room Details -->
+                                <h3 class="text-base font-bold">{{ selectedRoom?.room_name }}</h3>
+                                <div v-if="isRoomInfoVisible" class="flex items-center text-sm space-x-2 mt-1">
+                                    <p>{{ selectedRoom?.room_bed_groups }}</p>
+                                    <p>{{ selectedRoom?.room_size_sqm }} m²</p>
+                                </div>
 
+                                <!-- Cancellation Policy -->
+                                <div class="flex items-center text-sm space-x-2 mt-2">
+                                    <div v-if="selectedRoom?.cancel_policy_code !== 'RO'"
+                                        class="flex items-center text-green-600">
+                                        <UIcon name="i-material-symbols:credit-score-outline" />
+                                        <p>{{ selectedRoom?.cancel_policy_description }}</p>
+                                    </div>
+                                    <div v-else class="flex items-center text-gray-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4">
+                                            <path
+                                                d="M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z" />
+                                        </svg>
+                                        <p>No Cancellation</p>
+                                    </div>
+                                </div>
+
+                                <!-- Pricing -->
+                                <div class="mt-4">
+                                    <p class="text-lg font-semibold">
+                                        Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night
+                                    </p>
+                                    <p v-if="isTotalPriceVisible" class="text-sm text-gray-600">
+                                        Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }} ({{
+                                            store.rooms }}
+                                        room, {{
+                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
+                                        }}
+                                        nights)
+                                    </p>
+                                    <p class="text-xs text-gray-400">*Price is subject to change without prior
+                                        notice</p>
+                                </div>
 
                             </div>
+                            <!-- Zoom Button -->
+                            <div class="mt-4 flex justify-end items-end">
+                                <BaseButtonGroup>
+                                    <BaseButtonIcon rounded="lg">
+                                        <Icon name="mdi:fullscreen-exit" class="h-5 w-5" />
+                                    </BaseButtonIcon>
+                                    <BaseButtonIcon>
+                                        <Icon name="mdi:zoom-out-outline" class="h-5 w-5" />
+                                    </BaseButtonIcon>
+                                    <BaseButtonIcon>
+                                        <Icon name="mdi:zoom-in-outline" class="h-5 w-5" />
+                                    </BaseButtonIcon>
+                                    <BaseButtonIcon rounded="lg" @click="toggleZoom">
+                                        <Icon name="mdi:fullscreen" class="h-5 w-5" />
+                                    </BaseButtonIcon>
+                                </BaseButtonGroup>
 
-                        </section>
-
-                        <section class="flex flex-col justify-between mt-4 md:mt-0">
-                            <div>
-                                <div class="flex items-center justify-between h-11 border-b p-3 text-sm">
-                                    <p>Address</p>
-                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                                </div>
-                                <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
-                                    <p>Hotel Reviews</p>
-                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                                </div>
-                                <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
-                                    <p>Room info (bed type, room size, view)</p>
-                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                                </div>
-                                <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
-                                    <p>Total price</p>
-                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                                </div>
                             </div>
+                        </div>
 
-                            <div class="flex items-center justify-around h-10 border-t w-full">
-                                <UButton label="Copy as Text" color="blue" variant="outline"
-                                    icon="i-mdi:content-copy" />
-                                <UButton label="Copy as Image" color="blue" variant="outline" icon="i-mdi:line-scan" />
+
+
+                    </section>
+
+                    <section class="flex flex-col justify-between mt-4 md:mt-0  w-[40%] z-20 bg-white">
+                        <div>
+                            <div class="flex items-center justify-between h-10 border-b p-3 text-sm">
+                                <p>Address</p>
+                                <UButton :icon="isAddressVisible ? 'i-mdi:eye' : 'i-mdi:eye-off'" size="sm"
+                                    variant="ghost" color="black" @click="isAddressVisible = !isAddressVisible" />
                             </div>
+                            <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
+                                <p>Hotel Reviews</p>
+                                <UButton :icon="isReviewsVisible ? 'i-mdi:eye' : 'i-mdi:eye-off'" size="sm"
+                                    variant="ghost" color="black" @click="isReviewsVisible = !isReviewsVisible" />
+                            </div>
+                            <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
+                                <p>Room info (bed type, room size, view)</p>
+                                <UButton :icon="isRoomInfoVisible ? 'i-mdi:eye' : 'i-mdi:eye-off'" size="sm"
+                                    variant="ghost" color="black" @click="isRoomInfoVisible = !isRoomInfoVisible" />
+                            </div>
+                            <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
+                                <p>Total price</p>
+                                <UButton :icon="isTotalPriceVisible ? 'i-mdi:eye' : 'i-mdi:eye-off'" size="sm"
+                                    variant="ghost" color="black" @click="isTotalPriceVisible = !isTotalPriceVisible" />
+                            </div>
+                        </div>
 
-                        </section>
-
-                    </div>
+                        <div class="flex items-center justify-around h-10 border-t w-full py-2">
+                            <UButton label="Copy as Text" color="blue" variant="outline" icon="i-mdi:content-copy"
+                                size="xs" />
+                            <UButton label="Copy as Image" color="blue" variant="outline" icon="i-mdi:line-scan"
+                                size="xs" />
+                        </div>
+                    </section>
 
                 </div>
 
