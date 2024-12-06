@@ -2,7 +2,8 @@
 export default defineNuxtConfig({
   runtimeConfig: {
     public: {
-      baseUrl: process.env.BASE_URL || 'https://default-url.com'
+      baseUrl: process.env.BASE_URL || 'https://default-url.com',
+      eksternalUrl: process.env.EKSTERNAL_URL || 'https://default-url.com'
     }
   },
   build: {

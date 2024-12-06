@@ -22,9 +22,11 @@ export const useDataStore = defineStore('data', {
         loading: false,
         query: 'Fairmont Jakarta, Jakarta, Indonesia',
         error: null as string | null,
+        isLoading: false,
     }),
     actions: {
         async fetchData(apiUrl: string) {
+            this.isLoading = true;
             this.loading = true;
             this.error = null;
             try {
@@ -39,6 +41,7 @@ export const useDataStore = defineStore('data', {
                 }
             } finally {
                 this.loading = false;
+                this.isLoading = false;
             }
         },
 
@@ -48,7 +51,7 @@ export const useDataStore = defineStore('data', {
         },
 
         async fetchProperties() {
-
+            this.isLoading = true;
             this.loading = true;
             this.error = null;
             try {
@@ -74,11 +77,12 @@ export const useDataStore = defineStore('data', {
                 console.error('Error fetching properties:', error)
             } finally {
                 this.loading = false;
+                this.isLoading = false;
             }
         },
         async fetchContent(propertyId: string) {
-
-            const url = `${this.config.public.baseUrl}/property/content?id=${propertyId}&include=image&include=general_info&include=important_info`
+            this.isLoading = true;
+            const url = `${this.config.public.baseUrl}/property/content?id=${propertyId}&include=image&include=general_info&include=important_info&include=room`
 
             try {
                 const response = await $fetch(url)
@@ -87,11 +91,13 @@ export const useDataStore = defineStore('data', {
                 this.content = data[propertyId]
             } catch (error) {
                 console.error(`Error fetching availability for property ${propertyId}:`, error)
+            } finally {
+                this.isLoading = false;
             }
         },
 
         async fetchAvailability(propertyId: string) {
-
+            this.isLoading = true;
             const checkin = moment(this.checkin).format('YYYY-MM-DD')
             const checkout = moment(this.checkout).format('YYYY-MM-DD')
             const url = `${this.config.public.baseUrl}/stay/availability/${propertyId}?checkin=${checkin}&checkout=${checkout}&guest_per_room=${this.guests}&number_of_room=${this.rooms}`
@@ -102,11 +108,12 @@ export const useDataStore = defineStore('data', {
                 this.availability = data
             } catch (error) {
                 console.error(`Error fetching availability for property ${propertyId}:`, error)
+            } finally {
+                this.isLoading = false;
             }
         },
 
         async fetchQuery() {
-
             this.loading = true;
             this.error = null;
             try {
@@ -133,6 +140,32 @@ export const useDataStore = defineStore('data', {
                 console.error('Error fetching properties:', error)
             } finally {
                 this.loading = false;
+
+            }
+        },
+
+        async fetchAmenities(roomId: string) {
+            this.isLoading = true;
+
+            const url = `${this.config.public.eksternalUrl}/amenities`
+
+            try {
+                const response = await $fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify({ context: 'room', amenities: JSON.stringify(this.content?.room[roomId].amenities) }),
+                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'no-cors'
+                })
+
+
+                const data = await response as any
+                if (this.content) {
+                    this.content.show_amenity = data;
+                }
+            } catch (error) {
+                console.error(`Error fetching availability for property ${roomId}:`, error)
+            } finally {
+                this.isLoading = false;
             }
         },
 
@@ -198,6 +231,12 @@ export const useDataStore = defineStore('data', {
 
         dateFormatted(): string {
             return formattedDate(this.checkin, this.checkout)
+        },
+
+        getSelectedRoom(): any {
+
+            return this.content?.show_amenity
+
         }
 
 
