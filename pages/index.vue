@@ -129,6 +129,7 @@ const selectedRoomData = computed(() => {
 
 const isLoading = computed(() => store.isLoading);
 
+const transitionName = ref('fade');
 
 </script>
 
@@ -187,7 +188,9 @@ const isLoading = computed(() => store.isLoading);
         </section>
 
         <section>
-            <TabsComponent :items="items" @tabChange="handleTabChange" isTop />
+            <transition :name="transitionName">
+                <TabsComponent :items="items" @tabChange="handleTabChange" isTop />
+            </transition>
             <div v-if="activeTab == 0">
                 <div v-if="isLoading" class="animate-pulse py-10 text-gray-900">
                     <div class="flex flex-col justify-center items-center gap-6">
@@ -227,7 +230,7 @@ const isLoading = computed(() => store.isLoading);
                         </div>
 
 
-                        <div class="flex items-center justify-center w-full">
+                        <div class="flex items-center justify-center w-full flex-wrap">
 
 
 
@@ -237,10 +240,7 @@ const isLoading = computed(() => store.isLoading);
 
 
                                     <div class="flex flex-col lg:flex-row justify-center gap-6 w-full">
-
                                         <div class="flex flex-col items-center w-full lg:w-auto">
-
-
                                             <div class="relative">
                                                 <NuxtImg :src="store.groupedImagesByRoomName[bedGroup][0]"
                                                     :alt="store.groupedImagesByRoomName[bedGroup][0]" loading="lazy"
@@ -253,17 +253,16 @@ const isLoading = computed(() => store.isLoading);
                                                 </UButton>
                                             </div>
 
-                                            <div class="grid grid-cols-3 gap-1 justify-center pt-1 items-center">
+                                            <div
+                                                class="grid grid-cols-3 gap-1 justify-center pt-1 items-center w-full lg:w-auto">
                                                 <div v-for="(image, index) in store.groupedImagesByRoomName[bedGroup]"
                                                     :key="index" class="flex justify-center items-center">
-
                                                     <div v-if="index < 3" class="relative w-24 h-24">
                                                         <NuxtImg
                                                             :src="store.groupedImagesByRoomName[bedGroup][index + 1]"
                                                             :alt="store.groupedImagesByRoomName[bedGroup][index + 1]"
                                                             loading="lazy" densities="x1 x2" quality="100" fit="contain"
                                                             class="max-w-full h-auto rounded-lg" />
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -434,6 +433,8 @@ const isLoading = computed(() => store.isLoading);
                                 </div>
                             </div>
                         </div>
+
+
                     </section>
                 </div>
             </div>
@@ -508,272 +509,284 @@ const isLoading = computed(() => store.isLoading);
 
         </section>
 
+        <transition :name="transitionName">
+            <UModal v-model="isOpen" :ui="{
+                width: 'w-[90vw] md:w-[50vh]',
+                height: 'h-[80vh] md:h-[40vh]',
+                overflow: 'overflow-y-auto',
+                strategy: 'override'
+            }">
 
-        <UModal v-model="isOpen" :ui="{
-            width: 'w-[90vw] md:w-[50vh]',
-            height: 'h-[80vh] md:h-[40vh]',
-            overflow: 'overflow-y-auto',
-            strategy: 'override'
-        }">
+                <div class="w-full h-full overflow-auto">
 
-            <div class="w-full h-full overflow-auto">
-
-                <div class="flex items-center justify-between border-b h-12">
-                    <div class="flex items-center justify-center pl-4 md:pl-40 gap-2">
-                        <UIcon name="i-mdi:share-variant-outline" class="text-blue-500" />
-                        <h2>Share This Offer</h2>
+                    <div class="flex items-center justify-between border-b h-12">
+                        <div class="flex items-center justify-center pl-4 md:pl-40 gap-2">
+                            <UIcon name="i-mdi:share-variant-outline" class="text-blue-500" />
+                            <h2>Share This Offer</h2>
+                        </div>
+                        <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1"
+                            @click="isOpen = false" />
                     </div>
-                    <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1"
-                        @click="isOpen = false" />
+
+
+                    <div class="flex flex-col md:flex-row justify-center">
+                        <section class="w-full md:w-96 h-full">
+                            <TabsComponent :items="itemsButton" @tabChange="handleTabButtonChange" :isTop=false />
+                            <div v-if="activeTabButton == 0">
+                                <div v-if="isLoading"
+                                    class="animate-pulse flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
+                                    <div class="h-6 bg-gray-300 w-48"></div>
+                                    <div class="mt-2 h-4 bg-gray-300 w-32"></div>
+                                    <div class="mt-2 h-4 bg-gray-300 w-24"></div>
+                                    <div class="mt-2 h-4 bg-gray-300 w-16"></div>
+                                </div>
+                                <div v-else class="flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
+                                    <div>
+                                        <p>{{ store.content?.name }}</p>
+                                        <p v-if="(store.content?.catalog.review_rating ?? 0) > 90">Excellent ({{
+                                            store.content?.catalog.review_rating }} of 100) · {{
+                                                store.content?.catalog.review_count }} reviews</p>
+                                        <p>{{ store.dateFormatted }} · {{
+                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
+                                        }}
+                                            nights</p>
+                                    </div>
+
+                                    <div>
+                                        <p>{{ selectedRoom?.room_name }}</p>
+                                        <p>{{ selectedRoom?.room_bed_groups }}</p>
+                                        <p>{{ selectedRoom?.meal_plan_description }} · {{
+                                            selectedRoom?.cancel_policy_description }}</p>
+                                        <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night</p>
+                                        <p>Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }} ({{
+                                            store.rooms }}
+                                            room, {{
+                                                moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
+                                            }}
+                                            nights)</p>
+                                    </div>
+
+                                    <p>*Price is subject to change without prior notice</p>
+
+                                </div>
+                            </div>
+
+                            <div v-if="activeTabButton == 1">
+
+                                <div v-if="isLoading"
+                                    class="animate-pulse flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
+                                    <div class="h-6 bg-gray-300 w-48"></div>
+                                    <div class="mt-2 h-4 bg-gray-300 w-32"></div>
+                                    <div class="mt-2 h-4 bg-gray-300 w-24"></div>
+                                    <div class="mt-2 h-4 bg-gray-300 w-16"></div>
+                                </div>
+                                <div v-else class="flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
+                                    <UCard :ui="{ strategy: 'override', base: 'w-80 h-96' }">
+                                        <div class="flex items-center text-center justify-start">
+                                            <h1 class="text-sm font-bold">{{ store.content?.name }}</h1>
+                                            <div class="text-yellow-500 flex ">
+                                                <div v-for=" (star) in store.content?.catalog.star_rating">
+                                                    <UIcon name="i-fontisto:star" class="w-2" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center justify-start gap-1">
+
+
+                                            <RadialComponent :text="String(store.content?.catalog.review_rating)"
+                                                :progress="store.content?.catalog.review_rating" :strokeWidth="5"
+                                                :width="12" :height="12" strokeColor="text-fuchsia-700" :max="100"
+                                                :font-size="18" font-color="#a21caf" />
+
+
+
+                                            <div v-if="Number(store.content?.catalog.review_rating) > 90"
+                                                class="text-sm">
+                                                <p>Excellent</p>
+                                            </div>
+                                            <div v-else class="text-sm">
+                                                <p class="text-red-500">No Rating</p>
+                                            </div>
+                                            ·
+                                            <div class="text-sm">{{ store.content?.catalog.review_count }} reviews</div>
+                                        </div>
+
+                                        <p class="text-xs">{{ store.dateFormatted }} · {{
+                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
+                                        }}
+                                            nights</p>
+
+
+                                        <img :src="selectedRoom?.room_images[0].size_sm" :alt="selectedRoom?.room_name"
+                                            class="w-64 h-28 object-cover rounded-lg shadow-md my-2" />
+                                        <div>
+                                            <h3 class="text-sm font-bold">{{ selectedRoom?.room_name }}</h3>
+                                            <div class="flex items-center justify-start text-sm gap-2">
+                                                <p>{{ selectedRoom?.room_bed_groups }}</p>
+                                                <p>{{ selectedRoom?.room_size_sqm }} m2</p>
+                                            </div>
+                                        </div>
+
+                                        <div>
+
+
+                                            <div class="flex flex-row items-center text-sm gap-y-2">
+                                                <div v-if="selectedRoom?.cancel_policy_code !== 'RO'"
+                                                    class="flex items-center gap-2 text-green-600">
+                                                    <UIcon name="i-material-symbols:credit-score-outline" />
+                                                    <p>{{ selectedRoom?.cancel_policy_description }}</p>
+                                                </div>
+
+                                                <div v-else class="flex items-center gap-2 text-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                        role="img" aria-hidden="true" class="text-gray-800"
+                                                        style="font-size: 16px; height: 16px; width: 16px;">
+
+                                                        <path
+                                                            d="M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z">
+                                                        </path>
+                                                        <line x1="26" y1="26" x2="6" y2="6" stroke="gray"
+                                                            stroke-width="2" />
+                                                    </svg>
+                                                    <p class=" text-gray-800">No Cancellation</p>
+                                                </div>
+
+
+                                            </div>
+
+
+                                            <div class="flex items-center justify-between text-xs">
+                                                <div>
+                                                    <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night
+                                                    </p>
+                                                    <p>Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }}
+                                                        ({{
+                                                            store.rooms }}
+                                                        room, {{
+                                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
+                                                        }}
+                                                        nights)</p>
+
+                                                    <p>*Price is subject to change without prior notice</p>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </UCard>
+
+                                </div>
+
+
+
+
+
+
+                            </div>
+
+                        </section>
+
+                        <section class="flex flex-col justify-between mt-4 md:mt-0">
+                            <div>
+                                <div class="flex items-center justify-between h-11 border-b p-3 text-sm">
+                                    <p>Address</p>
+                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
+                                </div>
+                                <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
+                                    <p>Hotel Reviews</p>
+                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
+                                </div>
+                                <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
+                                    <p>Room info (bed type, room size, view)</p>
+                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
+                                </div>
+                                <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
+                                    <p>Total price</p>
+                                    <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-around h-10 border-t w-full">
+                                <UButton label="Copy as Text" color="blue" variant="outline"
+                                    icon="i-mdi:content-copy" />
+                                <UButton label="Copy as Image" color="blue" variant="outline" icon="i-mdi:line-scan" />
+                            </div>
+
+                        </section>
+
+                    </div>
+
                 </div>
 
 
-                <div class="flex flex-col md:flex-row justify-center">
-                    <section class="w-full md:w-96 h-full">
-                        <TabsComponent :items="itemsButton" @tabChange="handleTabButtonChange" :isTop=false />
-                        <div v-if="activeTabButton == 0">
-                            <div v-if="isLoading"
-                                class="animate-pulse flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
-                                <div class="h-6 bg-gray-300 w-48"></div>
-                                <div class="mt-2 h-4 bg-gray-300 w-32"></div>
-                                <div class="mt-2 h-4 bg-gray-300 w-24"></div>
-                                <div class="mt-2 h-4 bg-gray-300 w-16"></div>
-                            </div>
-                            <div v-else class="flex items-start flex-col bg-gray-100 text-sm gap-y-5 p-5 w-96 h-96">
-                                <div>
-                                    <p>{{ store.content?.name }}</p>
-                                    <p v-if="(store.content?.catalog.review_rating ?? 0) > 90">Excellent ({{
-                                        store.content?.catalog.review_rating }} of 100) · {{
-                                            store.content?.catalog.review_count }} reviews</p>
-                                    <p>{{ store.dateFormatted }} · {{
-                                        moment.duration(moment(store.checkout).diff(moment(store.checkin))).days() }}
-                                        nights</p>
-                                </div>
+            </UModal>
+        </transition>
 
-                                <div>
-                                    <p>{{ selectedRoom?.room_name }}</p>
-                                    <p>{{ selectedRoom?.room_bed_groups }}</p>
-                                    <p>{{ selectedRoom?.meal_plan_description }} · {{
-                                        selectedRoom?.cancel_policy_description }}</p>
-                                    <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night</p>
-                                    <p>Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }} ({{ store.rooms }}
-                                        room, {{
-                                            moment.duration(moment(store.checkout).diff(moment(store.checkin))).days() }}
-                                        nights)</p>
-                                </div>
+        <transition :name="transitionName">
+            <UModal v-model="isOpenAmenities" :ui="{
+                width: 'w-[90vw] md:w-[40vw]',
+                height: 'h-[80vh] md:h-[40vh]',
+                strategy: 'override'
+            }">
 
-                                <p>*Price is subject to change without prior notice</p>
 
-                            </div>
+                <div class="flex flex-col md:flex-row justify-center h-full">
+                    <section class="w-full md:w-full md:h-full bg-black flex flex-col items-center justify-center">
+                        <UCarousel v-slot="{ item, index }" :items="selectedRoomData.images" :ui="{
+                            item: 'basis-full'
+                        }" class="overflow-hidden" arrows>
+
+                            <NuxtImg :src="item.links['1000px'].href" :alt="item.caption" loading="lazy"
+                                fit="contain" />
+
+
+
+
+
+                        </UCarousel>
+                        <!-- <div class="relative bottom-0 right-0 bg-gray-700 bg-opacity-30 text-white rounded-lg">
+                            <p>{{ index + 1 }} / {{ selectedRoomData.images.length }}</p>
+                        </div> -->
+                    </section>
+
+                    <section class="flex flex-col w-3/5 overflow-y-auto">
+                        <div class="flex items-center justify-between border-b px-4 py-2">
+                            <h3>Room Details</h3>
+                            <UButton color="blue" variant="ghost" icon="i-heroicons-x-mark-20-solid"
+                                @click="isOpenAmenities = false" />
                         </div>
 
-                        <div v-if="activeTabButton == 1">
+                        <p class="px-4">{{ selectedRoomData.name }}</p>
 
-                            <div v-if="isLoading"
-                                class="animate-pulse flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
-                                <div class="h-6 bg-gray-300 w-48"></div>
-                                <div class="mt-2 h-4 bg-gray-300 w-32"></div>
-                                <div class="mt-2 h-4 bg-gray-300 w-24"></div>
-                                <div class="mt-2 h-4 bg-gray-300 w-16"></div>
-                            </div>
-                            <div v-else class="flex items-start justify-center flex-col bg-gray-100 p-5 w-96 h-96">
-                                <UCard :ui="{ strategy: 'override', base: 'w-80 h-96' }">
-                                    <div class="flex items-center text-center justify-start">
-                                        <h1 class="text-sm font-bold">{{ store.content?.name }}</h1>
-                                        <div class="text-yellow-500 flex ">
-                                            <div v-for=" (star) in store.content?.catalog.star_rating">
-                                                <UIcon name="i-fontisto:star" class="w-2" />
-                                            </div>
+                        <div class="flex items-center justify-start gap-2 text-gray-500 px-4">
+                            <UIcon name="i-mdi:bed-king-outline" />
+                            <p>{{ activeRoom?.room_bed_groups }}</p>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true"
+                                class="v-icon__svg" style="font-size: 16px; height: 16px; width: 16px;">
+                                <path
+                                    d="M23,15H21V17H23V15M23,11H21V13H23V11M23,19H21V21C22,21 23,20 23,19M15,3H13V5H15V3M23,7H21V9H23V7M21,3V5H23C23,4 22,3 21,3M3,21H11V15H1V19A2,2 0 0,0 3,21M3,7H1V9H3V7M15,19H13V21H15V19M19,3H17V5H19V3M19,19H17V21H19V19M3,3C2,3 1,4 1,5H3V3M3,11H1V13H3V11M11,3H9V5H11V3M7,3H5V5H7V3Z">
+                                </path>
+                            </svg>
+                            <p class="px-4">{{ activeRoom?.room_size_sqm }} m2</p>
+                        </div>
 
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center justify-start gap-1">
-
-
-                                        <RadialComponent :text="String(store.content?.catalog.review_rating)"
-                                            :progress="store.content?.catalog.review_rating" :strokeWidth="5"
-                                            :width="12" :height="12" strokeColor="text-fuchsia-700" :max="100"
-                                            :font-size="18" font-color="#a21caf" />
-
-
-
-                                        <div v-if="Number(store.content?.catalog.review_rating) > 90" class="text-sm">
-                                            <p>Excellent</p>
-                                        </div>
-                                        <div v-else class="text-sm">
-                                            <p class="text-red-500">No Rating</p>
-                                        </div>
-                                        ·
-                                        <div class="text-sm">{{ store.content?.catalog.review_count }} reviews</div>
-                                    </div>
-
-                                    <p class="text-xs">{{ store.dateFormatted }} · {{
-                                        moment.duration(moment(store.checkout).diff(moment(store.checkin))).days() }}
-                                        nights</p>
-
-
-                                    <img :src="selectedRoom?.room_images[0].size_sm" :alt="selectedRoom?.room_name"
-                                        class="w-64 h-28 object-cover rounded-lg shadow-md my-2" />
-                                    <div>
-                                        <h3 class="text-sm font-bold">{{ selectedRoom?.room_name }}</h3>
-                                        <div class="flex items-center justify-start text-sm gap-2">
-                                            <p>{{ selectedRoom?.room_bed_groups }}</p>
-                                            <p>{{ selectedRoom?.room_size_sqm }} m2</p>
-                                        </div>
-                                    </div>
-
-                                    <div>
-
-
-                                        <div class="flex flex-row items-center text-sm gap-y-2">
-                                            <div v-if="selectedRoom?.cancel_policy_code !== 'RO'"
-                                                class="flex items-center gap-2 text-green-600">
-                                                <UIcon name="i-material-symbols:credit-score-outline" />
-                                                <p>{{ selectedRoom?.cancel_policy_description }}</p>
-                                            </div>
-
-                                            <div v-else class="flex items-center gap-2 text-sm">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img"
-                                                    aria-hidden="true" class="text-gray-800"
-                                                    style="font-size: 16px; height: 16px; width: 16px;">
-
-                                                    <path
-                                                        d="M11,9H9V2H7V9H5V2H3V9C3,11.12 4.66,12.84 6.75,12.97V22H9.25V12.97C11.34,12.84 13,11.12 13,9V2H11V9M16,6V14H18.5V22H21V2C18.24,2 16,4.24 16,6Z">
-                                                    </path>
-                                                    <line x1="26" y1="26" x2="6" y2="6" stroke="gray"
-                                                        stroke-width="2" />
-                                                </svg>
-                                                <p class=" text-gray-800">No Cancellation</p>
-                                            </div>
-
-
-                                        </div>
-
-
-                                        <div class="flex items-center justify-between text-xs">
-                                            <div>
-                                                <p>Rp {{ formatRate(String(selectedRoom?.rate_nightly)) }} / night</p>
-                                                <p>Total · Rp {{ formatRate(String(selectedRoom?.price_total)) }} ({{
-                                                    store.rooms }}
-                                                    room, {{
-                                                        moment.duration(moment(store.checkout).diff(moment(store.checkin))).days()
-                                                    }}
-                                                    nights)</p>
-
-                                                <p>*Price is subject to change without prior notice</p>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                </UCard>
-
-                            </div>
-
-
-
-
+                        <div class="px-4">
+                            <h3>Room Amenities</h3>
 
 
                         </div>
 
                     </section>
 
-                    <section class="flex flex-col justify-between mt-4 md:mt-0">
-                        <div>
-                            <div class="flex items-center justify-between h-11 border-b p-3 text-sm">
-                                <p>Address</p>
-                                <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                            </div>
-                            <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
-                                <p>Hotel Reviews</p>
-                                <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                            </div>
-                            <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
-                                <p>Room info (bed type, room size, view)</p>
-                                <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                            </div>
-                            <div class="flex items-center justify-between h-11 border-b  p-3 text-sm">
-                                <p>Total price</p>
-                                <UButton icon="i-mdi:eye" size="sm" variant="ghost" color="black" />
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-around h-10 border-t w-full">
-                            <UButton label="Copy as Text" color="blue" variant="outline" icon="i-mdi:content-copy" />
-                            <UButton label="Copy as Image" color="blue" variant="outline" icon="i-mdi:line-scan" />
-                        </div>
-
-                    </section>
-
                 </div>
 
-            </div>
-
-
-        </UModal>
-
-        <UModal v-model="isOpenAmenities" :ui="{
-            width: 'w-[90vw] md:w-[40vw]',
-            height: 'h-[80vh] md:h-[40vh]',
-            strategy: 'override'
-        }">
-
-
-            <div class="flex flex-col md:flex-row justify-center h-full">
-                <section class="w-full md:w-full md:h-full bg-black flex flex-col items-center justify-center">
-                    <UCarousel v-slot="{ item, index }" :items="selectedRoomData.images" :ui="{
-                        item: 'basis-full'
-                    }" class="overflow-hidden" arrows>
-
-                        <NuxtImg :src="item.links['1000px'].href" :alt="item.caption" loading="lazy" fit="contain" />
 
 
 
-
-
-                    </UCarousel>
-                    <!-- <div class="relative bottom-0 right-0 bg-gray-700 bg-opacity-30 text-white rounded-lg">
-                        <p>{{ index + 1 }} / {{ selectedRoomData.images.length }}</p>
-                    </div> -->
-                </section>
-
-                <section class="flex flex-col w-3/5 overflow-y-auto">
-                    <div class="flex items-center justify-between border-b px-4 py-2">
-                        <h3>Room Details</h3>
-                        <UButton color="blue" variant="ghost" icon="i-heroicons-x-mark-20-solid"
-                            @click="isOpenAmenities = false" />
-                    </div>
-
-                    <p class="px-4">{{ selectedRoomData.name }}</p>
-
-                    <div class="flex items-center justify-start gap-2 text-gray-500 px-4">
-                        <UIcon name="i-mdi:bed-king-outline" />
-                        <p>{{ activeRoom?.room_bed_groups }}</p>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true"
-                            class="v-icon__svg" style="font-size: 16px; height: 16px; width: 16px;">
-                            <path
-                                d="M23,15H21V17H23V15M23,11H21V13H23V11M23,19H21V21C22,21 23,20 23,19M15,3H13V5H15V3M23,7H21V9H23V7M21,3V5H23C23,4 22,3 21,3M3,21H11V15H1V19A2,2 0 0,0 3,21M3,7H1V9H3V7M15,19H13V21H15V19M19,3H17V5H19V3M19,19H17V21H19V19M3,3C2,3 1,4 1,5H3V3M3,11H1V13H3V11M11,3H9V5H11V3M7,3H5V5H7V3Z">
-                            </path>
-                        </svg>
-                        <p class="px-4">{{ activeRoom?.room_size_sqm }} m2</p>
-                    </div>
-
-                    <div class="px-4">
-                        <h3>Room Amenities</h3>
-
-
-                    </div>
-
-                </section>
-
-            </div>
-
-
-
-
-        </UModal>
+            </UModal>
+        </transition>
     </main>
 </template>
 
@@ -783,5 +796,18 @@ const isLoading = computed(() => store.isLoading);
         padding-left: 1rem;
         padding-right: 1rem;
     }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active in <2.1.8 */
+    {
+    opacity: 0;
 }
 </style>

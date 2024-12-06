@@ -145,7 +145,7 @@ export const useDataStore = defineStore('data', {
         },
 
         async fetchAmenities(roomId: string) {
-            this.isLoading = true;
+            this.loading = true;
 
             const url = `${this.config.public.eksternalUrl}/amenities`
 
@@ -165,7 +165,7 @@ export const useDataStore = defineStore('data', {
             } catch (error) {
                 console.error(`Error fetching availability for property ${roomId}:`, error)
             } finally {
-                this.isLoading = false;
+                this.loading = false;
             }
         },
 
